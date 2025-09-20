@@ -1,20 +1,78 @@
+# import uvicorn
+# from fastapi import FastAPI
+# from fastapi.middleware.cors import CORSMiddleware
+# from pydantic import BaseModel
+# import pickle
+# import pandas as pd
+
+# app = FastAPI()
+
+# # Enable CORS for all domains (development purpose)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # production এ specific origins দিবেন
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+# class InputData(BaseModel):
+#     variance: float
+#     skewness: float
+#     curtosis: float
+#     entropy: float
+
+# with open("final_pipeline.pkl", "rb") as f:
+#     model = pickle.load(f)
+
+# @app.get("/")
+# async def index():
+#     return {"message": "👋 Hello World, Welcome to Bank Note Authentication API"}
+
+# @app.post("/predict")
+# async def predict(data: InputData):
+#     input_df = pd.DataFrame([data.dict()])
+#     prediction = model.predict(input_df)
+#     return {"prediction": int(prediction[0])}
+
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="127.0.0.1", port=8000)
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import pickle
 import pandas as pd
+import os
 
 app = FastAPI()
 
 # Enable CORS for all domains (development purpose)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # production এ specific origins দিবেন
+    allow_origins=["*"],  # প্রোডাকশনে specific origins দিবেন
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Model loading
+with open("final_pipeline.pkl", "rb") as f:
+    model = pickle.load(f)
+
+# Serve index.html from templates folder
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+INDEX_FILE = os.path.join(BASE_DIR, "templates", "index.html")
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    try:
+        with open(INDEX_FILE, "r") as f:
+            return f.read()
+    except Exception as e:
+        return f"<h2>❌ Error loading index.html: {e}</h2>"
 
 class InputData(BaseModel):
     variance: float
@@ -22,18 +80,14 @@ class InputData(BaseModel):
     curtosis: float
     entropy: float
 
-with open("final_pipeline.pkl", "rb") as f:
-    model = pickle.load(f)
-
-@app.get("/")
-async def index():
-    return {"message": "👋 Hello World, Welcome to Bank Note Authentication API"}
-
 @app.post("/predict")
 async def predict(data: InputData):
-    input_df = pd.DataFrame([data.dict()])
-    prediction = model.predict(input_df)
-    return {"prediction": int(prediction[0])}
+    try:
+        input_df = pd.DataFrame([data.dict()])
+        prediction = model.predict(input_df)
+        return {"prediction": int(prediction[0])}
+    except Exception as e:
+        return {"error": str(e)}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
