@@ -15,9 +15,6 @@ This project authenticates banknotes as genuine or counterfeit using machine lea
 Set start command as:
 uvicorn app:app --host 0.0.0.0 --port $PORT
 
-text
-4. Access your live app via the provided URL.
-
 # Live demo :
 You see this project Live : https://bank-note-authentication-3.onrender.com
 
