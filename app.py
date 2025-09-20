@@ -64,7 +64,7 @@ with open("final_pipeline.pkl", "rb") as f:
 
 # Serve index.html from templates folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-INDEX_FILE = os.path.join(BASE_DIR, "templates", "index.html")
+INDEX_FILE = os.path.join(BASE_DIR, "index.html")
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
