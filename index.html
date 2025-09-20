@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bank Note Authentication</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #eaeaea;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+    }
+
+    h1 {
+      margin-bottom: 1.5rem;
+      font-size: 1.6rem;
+      color: #00bcd4;
+      letter-spacing: 1px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+      text-align: left;
+      color: #bdbdbd;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: #2c2c2c;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 1rem;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus {
+      background: #333;
+      box-shadow: 0 0 0 2px #00bcd4;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(45deg, #00bcd4, #4cafef);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 188, 212, 0.5);
+    }
+
+    #result {
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .result {
+      color: #4cafef;
+    }
+
+    .error {
+      color: #e57373;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 Bank Note Authentication</h1>
+    <form id="predictForm">
+      <label for="variance">Variance</label>
+      <input type="number" step="0.01" id="variance" name="variance" placeholder="e.g., 2.3" required />
+
+      <label for="skewness">Skewness</label>
+      <input type="number" step="0.01" id="skewness" name="skewness" placeholder="e.g., 3.1" required />
+
+      <label for="curtosis">Curtosis</label>
+      <input type="number" step="0.01" id="curtosis" name="curtosis" placeholder="e.g., 2.1" required />
+
+      <label for="entropy">Entropy</label>
+      <input type="number" step="0.01" id="entropy" name="entropy" placeholder="e.g., 1.2" required />
+
+      <button type="submit">🔮 Predict</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('predictForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        variance: parseFloat(document.getElementById('variance').value),
+        skewness: parseFloat(document.getElementById('skewness').value),
+        curtosis: parseFloat(document.getElementById('curtosis').value),
+        entropy: parseFloat(document.getElementById('entropy').value)
+      };
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          document.getElementById('result').innerHTML = `<div class="result">✅ Prediction: ${result.prediction}</div>`;
+        } else {
+          document.getElementById('result').innerHTML = `<div class="error">❌ Error: ${result.detail || 'Unknown error'}</div>`;
+        }
+      } catch (error) {
+        document.getElementById('result').innerHTML = `<div class="error">⚠️ Error: ${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
